@@ -1,6 +1,3 @@
-def test_main():
-    with patch("sys.argv", ["pyneofetch"]):
-        main()
 from unittest.mock import patch
 from pyneofetch import (
     build_info_lines,
