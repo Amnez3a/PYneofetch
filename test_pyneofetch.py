@@ -5,7 +5,6 @@ from pyneofetch import (
     get_cpu_model,
     get_cpu_temp,
     get_package_count,
-    main,
     other_info,
     pc_info,
     render,
