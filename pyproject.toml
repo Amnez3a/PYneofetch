@@ -3,15 +3,15 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["PYfetch", "PYfetch_args"]
+py-modules = ["pyneofetch", "pyneofetch_args"]
 
 [project]
 name = "pyneofetch"
-version = "0.1.1"
+version = "0.1.2"
 description = "A simple system information fetcher for Python."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["psutil"]
 
 [project.scripts]
-pyfetch = "PYfetch:main"
+pyfetch = "pyneofetch:main"
