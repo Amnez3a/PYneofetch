@@ -19,5 +19,5 @@ PYfetch.py [-h] [--only {pc,user,desktop,other}] [--no-art] [--custom-art CUSTOM
 **Через pip:**
 ```bash
 pip install pyneofetch --break-system-packages
-pyfetch # пока что название будет pyFETCH, потом сменю
+pyneofetch
 ```
