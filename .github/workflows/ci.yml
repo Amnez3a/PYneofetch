@@ -15,4 +15,4 @@ jobs:
     - name: Run linter
       run: ruff check .
     - name: Run tests
-      run: pytest test_pyfetch.py -v
+      run: pytest test_pyneofetch.py -v

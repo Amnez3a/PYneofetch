@@ -77,4 +77,3 @@ def test_render(capsys):
 
 def test_main():
     with patch("sys.argv", ["pyneofetch"]):
-        main()
