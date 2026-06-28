@@ -1,4 +1,4 @@
-from pyneofetch_args import parse_args # args
+from pyneofetch_args import parse_args  # args
 import time
 import os
 import subprocess
@@ -6,6 +6,7 @@ import platform
 import psutil
 import shutil
 import sys
+import getpass
 from colorama import init, Fore, Back, Style
 
 init()
@@ -38,6 +39,7 @@ MACOS_ASCII_ART = """\
    :_________`-;
     `.__.-.__.'"""
 
+
 def get_cpu_model():
     try:
         with open("/proc/cpuinfo") as f:
@@ -64,12 +66,12 @@ def get_cpu_temp():
 
 def get_package_count():
     managers = {
-        "pacman":     ["pacman", "-Qq"],
-        "apt":        ["apt", "list", "--installed"],
-        "dnf":        ["rpm", "-qa"],
-        "zypper":     ["rpm", "-qa"],
+        "pacman": ["pacman", "-Qq"],
+        "apt": ["apt", "list", "--installed"],
+        "dnf": ["rpm", "-qa"],
+        "zypper": ["rpm", "-qa"],
         "xbps-query": ["xbps-query", "-l"],
-        "apk":        ["apk", "info"],
+        "apk": ["apk", "info"],
     }
     for mgr, cmd in managers.items():
         if shutil.which(mgr):
@@ -92,21 +94,27 @@ def pc_info():
         os_name = platform.system().strip()
 
     cpu_model = get_cpu_model()
-    cpu_temp  = get_cpu_temp()
+    cpu_temp = get_cpu_temp()
     cpu_usage = psutil.cpu_percent(interval=0.5)
 
-    gpu_raw  = subprocess.run("lspci | grep VGA", shell=True, text=True, capture_output=True).stdout.strip().split("\n")[0]
+    gpu_raw = (
+        subprocess.run("lspci | grep VGA", shell=True, text=True, capture_output=True)
+        .stdout.strip()
+        .split("\n")[0]
+    )
     gpu_info = gpu_raw.split(": ", 1)[1] if ": " in gpu_raw else gpu_raw
 
-    vm        = psutil.virtual_memory()
-    ram_used  = vm.used  // (1024 ** 3)
-    ram_total = vm.total // (1024 ** 3)
+    vm = psutil.virtual_memory()
+    ram_used = vm.used // (1024**3)
+    ram_total = vm.total // (1024**3)
 
-    disk        = psutil.disk_usage("/")
+    disk = psutil.disk_usage("/")
     disk_string = f"{disk.used / (1024**3):.1f} GB / {disk.total / (1024**3):.1f} GB ({disk.percent}%)"
 
-    kernel   = subprocess.run("uname -r", shell=True, text=True, capture_output=True).stdout.strip()
-    uptime   = (time.time() - psutil.boot_time()) / 3600
+    kernel = subprocess.run(
+        "uname -r", shell=True, text=True, capture_output=True
+    ).stdout.strip()
+    uptime = (time.time() - psutil.boot_time()) / 3600
     packages = get_package_count()
 
     return [
@@ -125,15 +133,15 @@ def pc_info():
 
 def user_info():
     return [
-        f"User:     {os.getlogin().strip()} | UID: {os.getuid()}",
+        f"User:     {getpass.getuser().strip()} | UID: {os.getuid()}",
         f"Home:     {os.path.expanduser('~').strip()}",
     ]
 
 
 def desktop_info():
-    wm_de    = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
-    shell    = os.environ.get("SHELL", "Unknown")
-    term     = os.environ.get("TERM", "Unknown")
+    wm_de = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
+    shell = os.environ.get("SHELL", "Unknown")
+    term = os.environ.get("TERM", "Unknown")
     env_path = os.environ.get("VIRTUAL_ENV")
     env_name = os.path.basename(env_path) if env_path else "not active"
 
@@ -153,10 +161,10 @@ def other_info():
 
 def build_info_lines():
     sections = [
-        (f"{Back.WHITE}{Fore.BLACK}PC INFO{Style.RESET_ALL}",      pc_info()),
-        (f"{Back.WHITE}{Fore.BLACK}USER INFO{Style.RESET_ALL}",    user_info()),
+        (f"{Back.WHITE}{Fore.BLACK}PC INFO{Style.RESET_ALL}", pc_info()),
+        (f"{Back.WHITE}{Fore.BLACK}USER INFO{Style.RESET_ALL}", user_info()),
         (f"{Back.WHITE}{Fore.BLACK}DESKTOP INFO{Style.RESET_ALL}", desktop_info()),
-        (f"{Back.WHITE}{Fore.BLACK}OTHER{Style.RESET_ALL}",        other_info()),
+        (f"{Back.WHITE}{Fore.BLACK}OTHER{Style.RESET_ALL}", other_info()),
     ]
     lines = []
     for title, content in sections:
@@ -177,9 +185,10 @@ def render(art_str, info_lines):
 
     total = max(len(art_lines), len(info_lines))
     for i in range(total):
-        left  = art_lines[i] if i < len(art_lines) else ""
+        left = art_lines[i] if i < len(art_lines) else ""
         right = info_lines[i] if i < len(info_lines) else ""
         print(f"{left:<{art_width}}{right}")
+
 
 def run_args(args):
     info_lines = build_info_lines()
@@ -190,34 +199,46 @@ def run_args(args):
             "macos": MACOS_ASCII_ART,
         }
         return logos.get(args.logo, ""), info_lines
-    
+
     if args.only:
-        valid_sections = {'pc': pc_info, 'user': user_info, 'desktop': desktop_info, 'other': other_info}
+        valid_sections = {
+            "pc": pc_info,
+            "user": user_info,
+            "desktop": desktop_info,
+            "other": other_info,
+        }
         selected = [s.strip() for s in args.only.split(",")]
         info_lines = []
         for sec in selected:
             if sec in valid_sections:
-                info_lines.append(f"{Back.WHITE}{Fore.BLACK}[ {sec.upper()} INFO ]{Style.RESET_ALL}")
+                info_lines.append(
+                    f"{Back.WHITE}{Fore.BLACK}[ {sec.upper()} INFO ]{Style.RESET_ALL}"
+                )
                 info_lines.extend(valid_sections[sec]())
                 info_lines.append("")
             else:
                 print(f"Warning: Invalid section '{sec}' ignored.")
-    
+
     # art
     if args.no_art:
         art = ""
     elif args.custom_art:
-        art = args.custom_art.read_text() if args.custom_art.is_file() else print(f"Error: Custom art file '{args.custom_art}' not found.") # я не ебу зачем в одну строчку запилил
+        art = (
+            args.custom_art.read_text()
+            if args.custom_art.is_file()
+            else print(f"Error: Custom art file '{args.custom_art}' not found.")
+        )  # я не ебу зачем в одну строчку запилил
     else:
         if platform.system() == "Linux":
             art = LINUX_ASCII_ART
         elif platform.system() == "Windows":
             art = WINDOWS_ASCII_ART
-        elif platform.system() == "Darwin": # macos
+        elif platform.system() == "Darwin":  # macos
             art = MACOS_ASCII_ART
         else:
             art = ""
     return art, info_lines
+
 
 def main():
     art, info_lines = run_args(parse_args())
