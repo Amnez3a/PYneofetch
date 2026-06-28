@@ -5,6 +5,7 @@ from pyneofetch import (
     get_cpu_model,
     get_cpu_temp,
     get_package_count,
+    main,
     other_info,
     pc_info,
     render,
@@ -76,3 +77,4 @@ def test_render(capsys):
 
 def test_main():
     with patch("sys.argv", ["pyneofetch"]):
+        main()
