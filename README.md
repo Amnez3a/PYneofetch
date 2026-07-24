@@ -10,7 +10,7 @@ PYfetch.py [-h] [--only {pc,user,desktop,other}] [--no-art] [--custom-art CUSTOM
 - `--only` - показ определенной информации
 - `--no-art` - без ascii арта
 - `--logo` - определенный логотип (macos, linux, windows)
-- `--custom-art` - кастомный ascii арт (пока не работает)
+- `--custom-art` - кастомный ascii арт
 
 ***
 
